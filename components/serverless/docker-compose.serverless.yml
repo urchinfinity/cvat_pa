@@ -1,3 +1,4 @@
+version: '3.6'
 services:
   # nuclio:
   #   container_name: nuclio
@@ -26,8 +27,8 @@ services:
     environment:
       CVAT_SERVERLESS: 1
     extra_hosts:
-      - "host.docker.internal:192.168.0.173"
+      - "host.docker.internal:192.168.107.4"
 
   cvat_worker_annotation:
     extra_hosts:
-      - "host.docker.internal:192.168.0.173"
+      - "host.docker.internal:192.168.107.4"

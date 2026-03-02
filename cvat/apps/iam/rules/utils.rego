@@ -6,6 +6,11 @@ BUSINESS := "business"
 USER := "user"
 WORKER := "worker"
 
+# create `annotator` group
+ANNOTATOR := "annotator"
+# use `pa_user` as annotators' assignee account
+ANNOTATOR_ACCOUNT_ID := 2
+
 # Visibility of objects
 PUBLIC := "public"
 PRIVATE := "private"
@@ -62,6 +67,7 @@ get_priority(privilege) = priority {
         ADMIN: 0,
         BUSINESS: 50,
         USER: 75,
+        ANNOTATOR: 75,
         WORKER: 100,
         null: 1000
     }[privilege]
@@ -85,6 +91,10 @@ is_user {
 
 is_worker {
     input.auth.user.privilege == WORKER
+}
+
+is_annotator {
+    input.auth.user.privilege == ANNOTATOR
 }
 
 is_resource_owner {

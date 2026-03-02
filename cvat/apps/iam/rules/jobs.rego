@@ -84,6 +84,24 @@ is_job_staff {
     is_job_assignee
 }
 
+# add job-related permissions to annotators
+is_annotator_scope {
+    input.resource.assignee.id == utils.ANNOTATOR_ACCOUNT_ID
+}
+
+is_annotator_scope {
+    input.resource.task.assignee.id == utils.ANNOTATOR_ACCOUNT_ID
+}
+
+is_annotator_scope {
+    input.resource.project.assignee.id == utils.ANNOTATOR_ACCOUNT_ID
+}
+
+is_job_staff {
+    utils.is_annotator
+    is_annotator_scope
+}
+
 default allow = false
 
 allow {
@@ -110,6 +128,24 @@ filter = [] { # Django Q object to filter list of entries
     qobject := [
         {"segment__task__organization": input.auth.organization.id},
         {"segment__task__project__organization": input.auth.organization.id}, "|" ]
+} else = qobject {
+    # add job listing permission to annotators
+    utils.is_annotator
+    utils.is_sandbox
+    user_id := input.auth.user.id
+    annotator_id := utils.ANNOTATOR_ACCOUNT_ID
+    print("[URCHIN] Filtering jobs:", input.auth.user)
+    qobject := [
+        {"assignee_id": user_id},
+        {"segment__task__owner_id": user_id}, "|",
+        {"segment__task__assignee_id": user_id}, "|",
+        {"segment__task__project__owner_id": user_id}, "|",
+        {"segment__task__project__assignee_id": user_id}, "|",
+        {"assignee_id": annotator_id}, "|",
+        {"segment__task__owner_id": annotator_id}, "|",
+        {"segment__task__assignee_id": annotator_id}, "|",
+        {"segment__task__project__owner_id": annotator_id}, "|",
+        {"segment__task__project__assignee_id": annotator_id}, "|"]
 } else = qobject {
     utils.is_sandbox
     user := input.auth.user
@@ -159,6 +195,8 @@ allow {
       utils.EXPORT_DATASET, utils.EXPORT_ANNOTATIONS,
       utils.VIEW_ANNOTATIONS, utils.VIEW_DATA, utils.VIEW_METADATA, utils.VIEW_COMMITS
     }[input.scope]
+    print("[URCHIN] Checking access for user:", is_job_staff, input.resource.assignee.id, input.resource.task.assignee.id, input.resource.project.assignee.id)
+
     utils.is_sandbox
     is_job_staff
 }
